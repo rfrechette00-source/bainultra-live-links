@@ -891,15 +891,19 @@ function init() {
   let p = 0;
   const iv = setInterval(() => {
     p += Math.random() * 30;
-    if (p >= 100) { p = 100; fill.style.width = '100%'; clearInterval(iv); setTimeout(() => document.getElementById('loader').classList.add('gone'), 250); }
+    if (p >= 100) {
+      p = 100; fill.style.width = '100%'; clearInterval(iv);
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('gone');
+        // Auto-open TOC after loader fades
+        setTimeout(() => document.getElementById('tocPanel').classList.add('open'), 400);
+      }, 250);
+    }
     else fill.style.width = p + '%';
   }, 120);
 
   spread = 0;
   render();
-
-  // Auto-open TOC on load
-  document.getElementById('tocPanel').classList.add('open');
 }
 
 document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
