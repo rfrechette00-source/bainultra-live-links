@@ -897,6 +897,9 @@ function init() {
 
   spread = 0;
   render();
+
+  // Auto-open TOC on load
+  document.getElementById('tocPanel').classList.add('open');
 }
 
 document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
