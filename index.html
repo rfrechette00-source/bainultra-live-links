@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>BainUltra - Live Links</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -26,6 +26,7 @@ body {
   color: #fff;
   display: flex; flex-direction: column;
   align-items: center;
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 /* Header */
@@ -72,7 +73,6 @@ body {
   padding: 32px 28px;
   text-decoration: none; color: #fff;
   transition: all 0.3s ease;
-  overflow: hidden;
   display: flex; flex-direction: column; gap: 12px;
 }
 .card::before {
@@ -144,8 +144,11 @@ body {
 @media (max-width: 500px) {
   .header { padding: 40px 24px 16px; }
   .logo-mark { font-size: 36px; }
-  .cards { grid-template-columns: 1fr; gap: 16px; padding: 0 16px 40px; }
-  .card { padding: 24px 20px; }
+  .cards { grid-template-columns: 1fr; gap: 20px; padding: 0 16px calc(40px + env(safe-area-inset-bottom, 0px)); }
+  .card { padding: 28px 22px 32px; }
+  .card-view { padding: 12px 20px; font-size: 14px; }
+  .card-download { padding: 10px 18px; font-size: 13px; }
+  .card-buttons { gap: 10px; margin-top: 12px; }
 }
 </style>
 </head>
