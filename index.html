@@ -112,6 +112,23 @@ body {
 }
 .card:hover .card-arrow { opacity: 1; transform: translateX(0); }
 
+.card-download {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 500; color: var(--bu-accent);
+  text-decoration: none; margin-top: 4px;
+  padding: 6px 14px; border-radius: 6px;
+  background: rgba(200,168,124,0.1);
+  border: 1px solid rgba(200,168,124,0.2);
+  transition: all 0.2s; width: fit-content;
+  cursor: pointer;
+}
+.card-download:hover {
+  background: rgba(200,168,124,0.2);
+  border-color: rgba(200,168,124,0.4);
+  color: var(--bu-accent-light);
+}
+.card-download svg { width: 14px; height: 14px; fill: currentColor; }
+
 
 @media (max-width: 500px) {
   .header { padding: 40px 24px 16px; }
@@ -145,26 +162,27 @@ body {
 <div class="divider"></div>
 
 <div class="cards">
-  <a class="card" href="pricebook/">
+  <div class="card" onclick="window.location='pricebook/'" style="cursor:pointer">
     <div class="card-icon">&#128214;</div>
     <div class="card-title">2026 Price List</div>
     <div class="card-desc">Complete product catalog with pricing for all BainUltra bath collections, therapies, and accessories.</div>
+    <a class="card-download" href="https://github.com/rfrechette00-source/BainUltra-Online-Hub/releases/download/v1.0/BU_Price_List_2026_FINAL.interactive.version.1.pdf" download onclick="event.stopPropagation()">
+      <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4h14v-2H5v2z"/></svg>
+      Download PDF
+    </a>
     <div class="card-arrow">&rarr;</div>
-  </a>
+  </div>
 
-  <a class="card" href="brochure/">
+  <div class="card" onclick="window.location='brochure/'" style="cursor:pointer">
     <div class="card-icon">&#128218;</div>
     <div class="card-title">Product Brochure</div>
     <div class="card-desc">Digital flipbook showcasing BainUltra's complete product line, designs, and wellness innovations.</div>
+    <a class="card-download" href="brochure/BainUltra-Product-Brochure.pdf" download onclick="event.stopPropagation()">
+      <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4h14v-2H5v2z"/></svg>
+      Download PDF
+    </a>
     <div class="card-arrow">&rarr;</div>
-  </a>
-
-  <a class="card" href="presentation/">
-    <div class="card-icon">&#127916;</div>
-    <div class="card-title">Product Knowledge Presentation with Video Content</div>
-    <div class="card-desc">Interactive presentation with video content covering BainUltra technologies, therapies, and product lines.</div>
-    <div class="card-arrow">&rarr;</div>
-  </a>
+  </div>
 </div>
 
 
