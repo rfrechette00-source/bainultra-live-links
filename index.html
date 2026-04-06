@@ -122,6 +122,27 @@ body {
   border-color: rgba(200,168,124,0.35);
 }
 .card-download svg { width: 13px; height: 13px; fill: currentColor; flex-shrink: 0; }
+.card-share {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.4);
+  padding: 8px 18px; border-radius: 7px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  transition: all 0.2s;
+  cursor: pointer;
+  width: 100%;
+}
+.card-share:hover {
+  background: rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.7);
+  border-color: rgba(255,255,255,0.15);
+}
+.card-share.copied {
+  color: #4ade80;
+  border-color: rgba(74,222,128,0.25);
+  background: rgba(74,222,128,0.07);
+}
+.card-share svg { width: 13px; height: 13px; fill: currentColor; flex-shrink: 0; }
 
 @media (max-width: 500px) {
   .header { padding: 40px 20px 14px; }
@@ -134,8 +155,28 @@ body {
   .card-buttons { gap: 7px; margin-top: 8px; }
   .card-view { padding: 11px 16px; font-size: 13px; }
   .card-download { padding: 9px 16px; font-size: 12px; }
+  .card-share { padding: 8px 16px; font-size: 12px; }
 }
 </style>
+<script>
+function copyLink(path, btn) {
+  let base = window.location.href;
+  if (base.endsWith('index.html')) base = base.slice(0, -'index.html'.length);
+  if (!base.endsWith('/')) base += '/';
+  navigator.clipboard.writeText(base + path).then(function() {
+    btn.classList.add('copied');
+    var icon = btn.querySelector('.share-icon');
+    var label = btn.querySelector('.share-label');
+    if (icon) icon.innerHTML = '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>';
+    if (label) label.textContent = 'Link Copied!';
+    setTimeout(function() {
+      btn.classList.remove('copied');
+      if (icon) icon.innerHTML = '<path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>';
+      if (label) label.textContent = 'Share Link';
+    }, 2200);
+  });
+}
+</script>
 </head>
 <body>
 
@@ -163,23 +204,27 @@ body {
 <div class="cards">
   <div class="card">
     <div class="card-icon">&#128214;</div>
-    <div class="card-title">2026 Price List</div>
+    <div class="card-title">2026 Price Book</div>
     <div class="card-desc">Complete product catalog with pricing for all BainUltra bath collections, therapies, and accessories.</div>
     <div class="card-buttons">
       <a class="card-view" href="pricebook/">
         <svg viewBox="0 0 24 24"><path d="M21 3H3a2 2 0 00-2 2v14a2 2 0 002 2h18a2 2 0 002-2V5a2 2 0 00-2-2zm0 16H3V5h18v14zM5 15h14v2H5v-2zm0-4h14v2H5v-2zm0-4h14v2H5V7z"/></svg>
-        View Interactive List
+        View Interactive Price Book
       </a>
       <a class="card-download" href="https://github.com/rfrechette00-source/BainUltra-Online-Hub/releases/download/v1.0/BU_Price_List_2026_FINAL.interactive.version.1.pdf" download>
         <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4h14v-2H5v2z"/></svg>
         Download PDF
       </a>
+      <button class="card-share" onclick="copyLink('pricebook/', this)">
+        <svg class="share-icon" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+        <span class="share-label">Share Link</span>
+      </button>
     </div>
   </div>
 
   <div class="card">
     <div class="card-icon">&#128218;</div>
-    <div class="card-title">Product Brochure</div>
+    <div class="card-title">Mini Product Brochure</div>
     <div class="card-desc">Digital flipbook showcasing BainUltra's complete product line, designs, and wellness innovations.</div>
     <div class="card-buttons">
       <a class="card-view" href="brochure/">
@@ -190,6 +235,26 @@ body {
         <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4h14v-2H5v2z"/></svg>
         Download PDF
       </a>
+      <button class="card-share" onclick="copyLink('brochure/', this)">
+        <svg class="share-icon" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+        <span class="share-label">Share Link</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-icon">&#127912;</div>
+    <div class="card-title">Brand Kit</div>
+    <div class="card-desc">Logos, photography, color palette, typography, and brand assets for customer use.</div>
+    <div class="card-buttons">
+      <a class="card-view" href="brand-kit/">
+        <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+        Browse Brand Kit
+      </a>
+      <button class="card-share" onclick="copyLink('brand-kit/', this)">
+        <svg class="share-icon" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+        <span class="share-label">Share Link</span>
+      </button>
     </div>
   </div>
 </div>
