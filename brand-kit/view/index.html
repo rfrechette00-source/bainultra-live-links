@@ -45,8 +45,8 @@ body {
 /* File grid */
 .file-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px; width: 100%; max-width: 1100px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px; width: 100%; max-width: 1200px;
   padding: 0 20px 60px;
 }
 .file-card {
@@ -226,7 +226,7 @@ function normalizeName(name) {
 
 function openLightbox(thumbUrl, dlUrl) {
   var lb = document.getElementById('lightbox');
-  document.getElementById('lightbox-img').src = thumbUrl.replace('sz=w400', 'sz=w1200');
+  document.getElementById('lightbox-img').src = thumbUrl.replace('=w400', '=w1200');
   document.getElementById('lightbox-dl').href = dlUrl;
   lb.classList.add('active');
 }
@@ -321,7 +321,7 @@ function loadFolder() {
           id: f.id, name: f.name, mimeType: f.mimeType,
           size: f.size ? Number(f.size) : 0,
           isFolder: f.mimeType === 'application/vnd.google-apps.folder',
-          thumbnail: 'https://drive.google.com/thumbnail?id=' + f.id + '&sz=w400',
+          thumbnail: 'https://lh3.googleusercontent.com/d/' + f.id + '=w400',
           downloadUrl: 'https://drive.google.com/uc?export=download&id=' + f.id,
           viewUrl: 'https://drive.google.com/file/d/' + f.id + '/view',
           previewUrl: 'https://drive.google.com/file/d/' + f.id + '/preview'
