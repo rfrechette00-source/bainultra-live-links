@@ -39,8 +39,8 @@ tools/launcher.html               ← Local terminal command launcher
 - **Never commit** `brand-kit/config.js`, `.DS_Store`, or any file in `.gitignore`
 - **Always push** to `claude/remove-exposed-api-key-ThrUa` unless explicitly told otherwise
 - Keep changes focused — don't refactor or "improve" things outside the task scope
-- When referencing a local file or folder path, make it a clickable `file://` hyperlink
-  so the user can open it directly in Finder (e.g. [/Users/Shared/BainUltra-Online-Hub](file:///Users/Shared/BainUltra-Online-Hub))
+- When referencing a local file or folder, use the Bash tool to run `open /path/to/file`
+  so it opens directly in Finder via the Claude Code permission prompt — never just print the path
 
 ## Known Issues / In Progress
 - Brand Kit Google Drive folder IDs may need updating — folders not loading
