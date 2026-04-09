@@ -3,25 +3,19 @@
   "configurations": [
     {
       "name": "main-live (3 tiles) (price book hidden)",
-      "runtimeExecutable": "python3",
+      "runtimeExecutable": "bash",
       "runtimeArgs": [
-        "-m",
-        "http.server",
-        "4000",
-        "--directory",
-        "/Users/Shared/BainUltra-preview-main"
+        "-c",
+        "cd '/Users/Shared/BainUltra-Online-Hub/Branches/(Branch Live) BainUltra-preview-live' && python3 -m http.server 4000"
       ],
       "port": 4000
     },
     {
       "name": "main-twin (practice and drafting)",
-      "runtimeExecutable": "python3",
+      "runtimeExecutable": "bash",
       "runtimeArgs": [
-        "-m",
-        "http.server",
-        "4001",
-        "--directory",
-        "/Users/Shared/BainUltra-preview-main-draft"
+        "-c",
+        "cd '/Users/Shared/BainUltra-Online-Hub/Branches/(Branch Twin) BainUltra-preview-twin' && python3 -m http.server 4001"
       ],
       "port": 4001
     },
@@ -30,7 +24,7 @@
       "runtimeExecutable": "bash",
       "runtimeArgs": [
         "-c",
-        "cd /Users/Shared/BainUltra-preview-main && python3 -m http.server 4002"
+        "cd '/Users/Shared/BainUltra-Online-Hub/Branches/(Branch Live) BainUltra-preview-live' && python3 -m http.server 4002"
       ],
       "port": 4002
     },
@@ -39,19 +33,16 @@
       "runtimeExecutable": "bash",
       "runtimeArgs": [
         "-c",
-        "cd /Users/Shared/BainUltra-preview-main && python3 mobile-server.py 4003"
+        "cd '/Users/Shared/BainUltra-Online-Hub/Branches/(Branch Live) BainUltra-preview-live' && python3 mobile-server.py 4003"
       ],
       "port": 4003
     },
     {
       "name": "draft (4 tiles) (price book shown)",
-      "runtimeExecutable": "python3",
+      "runtimeExecutable": "bash",
       "runtimeArgs": [
-        "-m",
-        "http.server",
-        "4004",
-        "--directory",
-        "/Users/Shared/BainUltra-Online-Hub"
+        "-c",
+        "cd '/Users/Shared/BainUltra-Online-Hub' && python3 -m http.server 4004"
       ],
       "port": 4004
     }

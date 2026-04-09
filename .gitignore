@@ -1,6 +1,8 @@
-brand-kit/config.js
+(Tile A) Brand-Kit/config.js
+(Tile A) Brand-Kit/files/**
 .DS_Store
-brand-kit/files/**
-!brand-kit/files/manifest.json
-pricebook/files/*.pdf
 .remember/
+Branches/
+(Tile B) Mini-Product-Brochure/files/Mini Product Brochure/*.pdf
+(Tile C) Product-Knowledge-Presentation/files/**
+(Tile D) 2026-Official-Price-Book/files/*.pdf
