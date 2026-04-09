@@ -1,0 +1,21 @@
+name: Block view-only branch merges
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check-source-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block merge from view-only branches
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [[ "$HEAD_REF" == "price-book-mobile" || "$HEAD_REF" == "price-book-desktop" ]]; then
+            echo "❌ '$HEAD_REF' is a view-only preview branch and cannot be merged into main."
+            echo "These branches exist only for visual comparison."
+            echo "Make changes on main-for-drafting or price-book-preview instead."
+            exit 1
+          fi
+          echo "✅ Source branch '$HEAD_REF' is allowed to merge."
