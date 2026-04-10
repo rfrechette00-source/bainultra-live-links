@@ -317,6 +317,8 @@
     <script src="../config.js"></script>
     <script>
       (function () {
+        var ROOT_ID = '1d9qY3wMaK-eUJJFNlnnX84F9StrG0LQS';
+
         // ── URL params ────────────────────────────────────────────────────────────────
         var params    = new URLSearchParams(window.location.search);
         var folderId  = params.get('folderId') || '';
@@ -405,10 +407,28 @@
           return e;
         }
 
+        // ── Thumbnail concurrency queue (max 4 simultaneous API requests) ─────────────
+        var thumbQueue = [], thumbActive = 0;
+        function queueThumb(folId, imgEl) {
+          thumbQueue.push([folId, imgEl]);
+          runThumbQueue();
+        }
+        function runThumbQueue() {
+          while (thumbActive < 4 && thumbQueue.length) {
+            var item = thumbQueue.shift();
+            thumbActive++;
+            loadFolderThumb(item[0], item[1]).then(function () {
+              thumbActive--;
+              runThumbQueue();
+            });
+          }
+        }
+
         // ── Load thumbnail for a folder ───────────────────────────────────────────────
         function loadFolderThumb(folId, imgEl) {
+          // Returns a Promise so the concurrency queue can track completion.
           // 1. direct images
-          driveList("'" + folId + "' in parents and mimeType contains 'image/' and trashed = false", 'files(id)', 5)
+          return driveList("'" + folId + "' in parents and mimeType contains 'image/' and trashed = false", 'files(id)', 5)
             .then(function (d) {
               if (d.files && d.files.length) {
                 imgEl.src = thumbUrl(d.files[0].id);
@@ -495,7 +515,7 @@
             grid.appendChild(card);
 
             // Lazy-load thumbnail
-            loadFolderThumb(item.id, img);
+            queueThumb(item.id, img);
           });
 
           // ── Files ──────────────────────────────────────────────────────────────────
@@ -596,19 +616,20 @@
         // ── Load folder from Drive ────────────────────────────────────────────────────
         function loadFolder() {
           var container = document.getElementById('content');
+
+          if (!hasKey() || !folderId) {
+            showDriveEmbed(folderId || ROOT_ID);
+            return;
+          }
+
           var spinner = el('div', 'status-msg');
           spinner.innerHTML = '<div class="spinner"></div>Loading files&hellip;';
           container.appendChild(spinner);
 
-          if (!hasKey() || !folderId) {
-            showDriveEmbed(folderId || '1d9qY3wMaK-eUJJFNlnnX84F9StrG0LQS');
-            return;
-          }
-
           driveList(
             "'" + folderId + "' in parents and trashed = false",
             'files(id,name,mimeType)',
-            200
+            100
           )
             .then(function (data) {
               if (data.error) throw new Error(data.error.message || 'Drive API error');

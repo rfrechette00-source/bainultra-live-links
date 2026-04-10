@@ -318,20 +318,18 @@
         }
 
         function showDriveEmbed(id) {
-          // Fallback: embed the Drive folder directly when API is unavailable
-          var container = document.querySelector('.folders');
-          container.style.cssText = 'width:100%;max-width:900px;flex:1;display:flex;flex-direction:column;padding:0 20px 60px;';
-          container.textContent = '';
+          grid.style.cssText = 'width:100%;max-width:900px;flex:1;display:flex;flex-direction:column;padding:0 20px 60px;';
+          grid.textContent = '';
           var iframe = document.createElement('iframe');
           iframe.src = 'https://drive.google.com/embeddedfolderview?id=' + id + '#grid';
           iframe.style.cssText = 'width:100%;min-height:70vh;border:none;border-radius:12px;flex:1;';
           iframe.allowFullscreen = true;
-          container.appendChild(iframe);
+          grid.appendChild(iframe);
         }
 
         function init() {
           if (!hasKey()) {
-            showDriveEmbed('1d9qY3wMaK-eUJJFNlnnX84F9StrG0LQS');
+            showDriveEmbed(ROOT_ID);
             return;
           }
 
@@ -354,7 +352,7 @@
               });
             })
             .catch(function () {
-              showDriveEmbed('1d9qY3wMaK-eUJJFNlnnX84F9StrG0LQS');
+              showDriveEmbed(ROOT_ID);
             });
         }
 
