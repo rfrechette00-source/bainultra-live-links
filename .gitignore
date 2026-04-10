@@ -7,3 +7,6 @@ brand-kit/files/**
 
 # Claude local session files
 .claude/
+
+# Local config with secrets — never commit
+brand-kit/config.js
