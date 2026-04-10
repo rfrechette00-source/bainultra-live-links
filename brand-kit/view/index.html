@@ -317,6 +317,8 @@
     <script src="../config.js"></script>
     <script>
       (function () {
+        var ROOT_ID = '1d9qY3wMaK-eUJJFNlnnX84F9StrG0LQS';
+
         // ── URL params ────────────────────────────────────────────────────────────────
         var params    = new URLSearchParams(window.location.search);
         var folderId  = params.get('folderId') || '';
@@ -405,10 +407,28 @@
           return e;
         }
 
+        // ── Thumbnail concurrency queue (max 4 simultaneous API requests) ─────────────
+        var thumbQueue = [], thumbActive = 0;
+        function queueThumb(folId, imgEl) {
+          thumbQueue.push([folId, imgEl]);
+          runThumbQueue();
+        }
+        function runThumbQueue() {
+          while (thumbActive < 4 && thumbQueue.length) {
+            var item = thumbQueue.shift();
+            thumbActive++;
+            loadFolderThumb(item[0], item[1]).then(function () {
+              thumbActive--;
+              runThumbQueue();
+            });
+          }
+        }
+
         // ── Load thumbnail for a folder ───────────────────────────────────────────────
         function loadFolderThumb(folId, imgEl) {
+          // Returns a Promise so the concurrency queue can track completion.
           // 1. direct images
-          driveList("'" + folId + "' in parents and mimeType contains 'image/' and trashed = false", 'files(id)', 5)
+          return driveList("'" + folId + "' in parents and mimeType contains 'image/' and trashed = false", 'files(id)', 5)
             .then(function (d) {
               if (d.files && d.files.length) {
                 imgEl.src = thumbUrl(d.files[0].id);
@@ -495,7 +515,7 @@
             grid.appendChild(card);
 
             // Lazy-load thumbnail
-            loadFolderThumb(item.id, img);
+            queueThumb(item.id, img);
           });
 
           // ── Files ──────────────────────────────────────────────────────────────────
@@ -581,42 +601,52 @@
           container.appendChild(grid);
         }
 
-        // ── Embedded Drive fallback (no API key needed) ───────────────────────────────
-        function showDriveEmbed(id) {
+        // ── Unable to load state ──────────────────────────────────────────────────────
+        function showUnavailable() {
           var container = document.getElementById('content');
           container.textContent = '';
-          container.style.cssText = 'width:100%;flex:1;display:flex;flex-direction:column;';
-          var iframe = document.createElement('iframe');
-          iframe.src = 'https://drive.google.com/embeddedfolderview?id=' + id + '#grid';
-          iframe.style.cssText = 'width:100%;flex:1;border:none;min-height:70vh;';
-          iframe.allowFullscreen = true;
-          container.appendChild(iframe);
+          var wrap = el('div', 'status-msg');
+          wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:18px;padding:60px 24px;';
+          var icon = document.createElement('div');
+          icon.style.cssText = 'color:var(--bu-accent);opacity:0.4;';
+          icon.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>';
+          var msg = document.createElement('div');
+          msg.style.cssText = 'font-size:14px;color:rgba(255,255,255,0.45);text-align:center;line-height:1.6;';
+          msg.textContent = 'Content is temporarily unavailable.';
+          var retry = document.createElement('button');
+          retry.textContent = 'Try again';
+          retry.style.cssText = 'background:rgba(200,168,124,0.15);border:1px solid rgba(200,168,124,0.3);color:var(--bu-accent);font-size:13px;font-weight:600;padding:10px 24px;border-radius:8px;cursor:pointer;';
+          retry.addEventListener('click', function () { container.textContent = ''; loadFolder(); });
+          wrap.appendChild(icon);
+          wrap.appendChild(msg);
+          wrap.appendChild(retry);
+          container.appendChild(wrap);
         }
 
         // ── Load folder from Drive ────────────────────────────────────────────────────
         function loadFolder() {
           var container = document.getElementById('content');
+
+          if (!hasKey() || !folderId) {
+            showUnavailable();
+            return;
+          }
+
           var spinner = el('div', 'status-msg');
           spinner.innerHTML = '<div class="spinner"></div>Loading files&hellip;';
           container.appendChild(spinner);
 
-          if (!hasKey() || !folderId) {
-            showDriveEmbed(folderId || '1d9qY3wMaK-eUJJFNlnnX84F9StrG0LQS');
-            return;
-          }
-
           driveList(
             "'" + folderId + "' in parents and trashed = false",
             'files(id,name,mimeType)',
-            200
+            100
           )
             .then(function (data) {
               if (data.error) throw new Error(data.error.message || 'Drive API error');
               renderFiles(data.files || []);
             })
             .catch(function () {
-              // API failed — fall back to embedded Drive folder viewer
-              showDriveEmbed(folderId);
+              showUnavailable();
             });
         }
 

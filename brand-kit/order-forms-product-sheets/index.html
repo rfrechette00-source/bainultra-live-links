@@ -317,17 +317,30 @@
           });
         }
 
-        function showError(msg) {
+        function showUnavailable() {
           grid.textContent = '';
-          var e = document.createElement('div');
-          e.className = 'status-msg';
-          e.textContent = msg;
-          grid.appendChild(e);
+          var wrap = document.createElement('div');
+          wrap.className = 'status-msg';
+          wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:18px;padding:60px 24px;';
+          var icon = document.createElement('div');
+          icon.style.cssText = 'color:var(--bu-accent);opacity:0.4;';
+          icon.innerHTML = '<svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>';
+          var msg = document.createElement('div');
+          msg.style.cssText = 'font-size:14px;color:rgba(255,255,255,0.45);text-align:center;line-height:1.6;';
+          msg.textContent = 'Content is temporarily unavailable.';
+          var retry = document.createElement('button');
+          retry.textContent = 'Try again';
+          retry.style.cssText = 'background:rgba(200,168,124,0.15);border:1px solid rgba(200,168,124,0.3);color:var(--bu-accent);font-size:13px;font-weight:600;padding:10px 24px;border-radius:8px;cursor:pointer;';
+          retry.addEventListener('click', function () { grid.textContent = ''; init(); });
+          wrap.appendChild(icon);
+          wrap.appendChild(msg);
+          wrap.appendChild(retry);
+          grid.appendChild(wrap);
         }
 
         function init() {
           if (!hasKey()) {
-            showError('Google API key not configured. Add config.js to brand-kit/.');
+            showUnavailable();
             return;
           }
 
@@ -349,8 +362,8 @@
                 renderFolders(sub.files || [], sectionId, sectionName);
               });
             })
-            .catch(function (err) {
-              showError(err.message || 'Could not load folders.');
+            .catch(function () {
+              showUnavailable();
             });
         }
 
