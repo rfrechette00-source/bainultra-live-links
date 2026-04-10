@@ -1,4 +1,3 @@
-brand-kit/config.js
 .DS_Store
 brand-kit/files/**
 !brand-kit/files/manifest.json
