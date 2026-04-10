@@ -317,17 +317,21 @@
           });
         }
 
-        function showError(msg) {
-          grid.textContent = '';
-          var e = document.createElement('div');
-          e.className = 'status-msg';
-          e.textContent = msg;
-          grid.appendChild(e);
+        function showDriveEmbed(id) {
+          // Fallback: embed the Drive folder directly when API is unavailable
+          var container = document.querySelector('.folders');
+          container.style.cssText = 'width:100%;max-width:900px;flex:1;display:flex;flex-direction:column;padding:0 20px 60px;';
+          container.textContent = '';
+          var iframe = document.createElement('iframe');
+          iframe.src = 'https://drive.google.com/embeddedfolderview?id=' + id + '#grid';
+          iframe.style.cssText = 'width:100%;min-height:70vh;border:none;border-radius:12px;flex:1;';
+          iframe.allowFullscreen = true;
+          container.appendChild(iframe);
         }
 
         function init() {
           if (!hasKey()) {
-            showError('Google API key not configured. Add config.js to brand-kit/.');
+            showDriveEmbed('1d9qY3wMaK-eUJJFNlnnX84F9StrG0LQS');
             return;
           }
 
@@ -349,8 +353,8 @@
                 renderFolders(sub.files || [], sectionId, sectionName);
               });
             })
-            .catch(function (err) {
-              showError(err.message || 'Could not load folders.');
+            .catch(function () {
+              showDriveEmbed('1d9qY3wMaK-eUJJFNlnnX84F9StrG0LQS');
             });
         }
 
