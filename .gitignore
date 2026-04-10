@@ -1,4 +1,12 @@
+# Secret config — never commit
 brand-kit/config.js
+
+# OS / editor noise
 .DS_Store
+
+# Large generated assets
 brand-kit/files/**
 !brand-kit/files/manifest.json
+
+# Claude local session files
+.claude/
