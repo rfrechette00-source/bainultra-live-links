@@ -244,32 +244,45 @@
             return;
           }
 
-          // Step 1: find "Showroom Video Loop" folder inside root
-          driveList(
-            "'" + ROOT_ID + "' in parents and name = '" + FOLDER_NAME + "' and mimeType = '" + FOLDER_MIME + "' and trashed = false",
-            'files(id,name)', 5
-          )
-            .then(function (d) {
-              if (!d.files || !d.files.length) throw new Error('Showroom Video Loop folder not found.');
-              var folderId = d.files[0].id;
+          var CONTENT_ID = '1-CZ3ouYd990vVYt9wzhR7Y1gsiS1IEQx';
 
-              // Step 2: find the video file inside it
-              return driveList(
-                "'" + folderId + "' in parents and trashed = false",
-                'files(id,name,mimeType)', 20
-              );
-            })
-            .then(function (d) {
-              var videoFile = (d.files || []).find(function (f) {
-                return VIDEO_MIME.test(f.mimeType)
-                  || /\.(mp4|mov|webm|m4v|avi|mkv)$/i.test(f.name);
-              });
-              if (!videoFile) throw new Error('No video file found in Showroom Video Loop folder.');
-              embedVideo(videoFile.id, videoFile.name);
-            })
-            .catch(function (err) {
-              showError(err.message || 'Could not load video.');
+          // Search for the video folder by name — content folder first, then root
+          function findVideoFolder(parentId) {
+            return driveList(
+              "'" + parentId + "' in parents and mimeType = '" + FOLDER_MIME + "' and trashed = false",
+              'files(id,name)', 50
+            ).then(function (d) {
+              var files = d.files || [];
+              return files.find(function (f) {
+                return f.name === FOLDER_NAME || f.name.toLowerCase().indexOf('video') !== -1;
+              }) || null;
             });
+          }
+
+          // Step 1: find folder in content folder, then root
+          findVideoFolder(CONTENT_ID).then(function (found) {
+            if (!found) return findVideoFolder(ROOT_ID);
+            return found;
+          }).then(function (found) {
+            if (!found) throw new Error('Showroom Video Loop folder not found.');
+
+            // Step 2: find video file inside it
+            return driveList(
+              "'" + found.id + "' in parents and trashed = false",
+              'files(id,name,mimeType)', 20
+            );
+          })
+          .then(function (d) {
+            var videoFile = (d.files || []).find(function (f) {
+              return VIDEO_MIME.test(f.mimeType)
+                || /\.(mp4|mov|webm|m4v|avi|mkv)$/i.test(f.name);
+            });
+            if (!videoFile) throw new Error('No video file found in Showroom Video Loop folder.');
+            embedVideo(videoFile.id, videoFile.name);
+          })
+          .catch(function (err) {
+            showError(err.message || 'Could not load video.');
+          });
         }
 
         findAndPlay();

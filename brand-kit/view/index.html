@@ -661,34 +661,78 @@
           container.appendChild(wrap);
         }
 
-        // ── Load folder — drive-map tree first, live API fallback ───────────────────
+        // Folder name aliases: displayed name → actual Drive folder name
+        var NAME_ALIASES = {
+          'Installation Guides & Manuals': 'Installation Guides:Manuals'
+        };
+
+        // ── Resolve a folder ID by searching parent by name ───────────────────────────
+        function resolveByName(name, parentId) {
+          var driveName = NAME_ALIASES[name] || name;
+          return driveList(
+            "'" + parentId + "' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+            'files(id,name)',
+            100
+          ).then(function (data) {
+            var files = data.files || [];
+            // exact match first, then alias match
+            var match = files.find(function (f) { return f.name === name; })
+                     || files.find(function (f) { return f.name === driveName; });
+            return match ? match.id : null;
+          }).catch(function () { return null; });
+        }
+
+        // ── Load from Drive API by known ID ──────────────────────────────────────────
+        function loadFromApi(id) {
+          return driveList(
+            "'" + id + "' in parents and trashed = false",
+            'files(id,name,mimeType)',
+            200
+          ).then(function (data) {
+            if (data.error) throw new Error(data.error.message || 'Drive API error');
+            renderFiles(data.files || []);
+          }).catch(function () { showUnavailable(); });
+        }
+
+        // ── Load folder — drive-map → direct API → name search ───────────────────────
         function loadFolder() {
           var container = document.getElementById('content');
-
-          if (!folderId) { showUnavailable(); return; }
 
           var spinner = el('div', 'status-msg');
           spinner.innerHTML = '<div class="spinner"></div>Loading files&hellip;';
           container.appendChild(spinner);
 
           getDriveMap().then(function (map) {
-            // Serve from pre-built tree if this folder is indexed
-            if (map && map.tree && map.tree[folderId]) {
+            // 1. Pre-built tree has this folder — instant, no API call
+            if (folderId && map && map.tree && map.tree[folderId]) {
               renderFiles(map.tree[folderId].children || []);
               return;
             }
-            // Fall back to live Drive API
+
             if (!hasKey()) { showUnavailable(); return; }
-            driveList(
-              "'" + folderId + "' in parents and trashed = false",
-              'files(id,name,mimeType)',
-              100
-            )
-              .then(function (data) {
-                if (data.error) throw new Error(data.error.message || 'Drive API error');
-                renderFiles(data.files || []);
-              })
-              .catch(function () { showUnavailable(); });
+
+            // 2. folderId known — direct API call
+            if (folderId) {
+              loadFromApi(folderId);
+              return;
+            }
+
+            // 3. No folderId — resolve by searching content folder then root by name
+            if (!folderName || folderName === 'Brand Kit') { showUnavailable(); return; }
+
+            var CONTENT_ID = '1-CZ3ouYd990vVYt9wzhR7Y1gsiS1IEQx';
+            resolveByName(folderName, CONTENT_ID).then(function (id) {
+              if (!id) return resolveByName(folderName, ROOT_ID);
+              return id;
+            }).then(function (id) {
+              if (!id) { showUnavailable(); return; }
+              // Update URL so back-navigation and sharing have the real folderId
+              folderId = id;
+              var p = new URLSearchParams(window.location.search);
+              p.set('folderId', id);
+              history.replaceState({}, '', '?' + p.toString());
+              loadFromApi(id);
+            }).catch(function () { showUnavailable(); });
           });
         }
 

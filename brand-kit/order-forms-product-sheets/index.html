@@ -341,33 +341,45 @@
           grid.appendChild(wrap);
         }
 
+        var CONTENT_ID = '1-CZ3ouYd990vVYt9wzhR7Y1gsiS1IEQx';
+        var FOLDER_NAME = 'Order Forms & Product Sheets';
+
+        // Search for the folder by name — checks content folder first, then root
+        function findSection(parentId) {
+          return driveList(
+            "'" + parentId + "' in parents and mimeType = '" + FOLDER_MIME + "' and trashed = false",
+            'files(id,name)', 50
+          ).then(function (d) {
+            var files = d.files || [];
+            return files.find(function (f) {
+              return f.name === FOLDER_NAME || f.name.toLowerCase().indexOf('order form') !== -1;
+            }) || null;
+          });
+        }
+
         function init() {
           if (!hasKey()) {
             showUnavailable();
             return;
           }
 
-          // Step 1: find "Order Forms & Product Sheets" folder in root
-          driveList(
-            "'" + ROOT_ID + "' in parents and name = 'Order Forms & Product Sheets' and mimeType = '" + FOLDER_MIME + "' and trashed = false",
-            'files(id,name)', 5
-          )
-            .then(function (d) {
-              if (!d.files || !d.files.length) throw new Error('"Order Forms & Product Sheets" folder not found in Drive.');
-              var sectionId = d.files[0].id;
-              var sectionName = d.files[0].name;
-
-              // Step 2: list its subfolders
-              return driveList(
-                "'" + sectionId + "' in parents and mimeType = '" + FOLDER_MIME + "' and trashed = false",
-                'files(id,name)', 30
-              ).then(function (sub) {
-                renderFolders(sub.files || [], sectionId, sectionName);
-              });
-            })
-            .catch(function () {
-              showUnavailable();
+          // Search content folder first, then root
+          findSection(CONTENT_ID).then(function (found) {
+            if (!found) return findSection(ROOT_ID);
+            return found;
+          }).then(function (found) {
+            if (!found) throw new Error('Order Forms folder not found.');
+            var sectionId = found.id;
+            var sectionName = found.name;
+            return driveList(
+              "'" + sectionId + "' in parents and mimeType = '" + FOLDER_MIME + "' and trashed = false",
+              'files(id,name)', 50
+            ).then(function (sub) {
+              renderFolders(sub.files || [], sectionId, sectionName);
             });
+          }).catch(function () {
+            showUnavailable();
+          });
         }
 
         init();
