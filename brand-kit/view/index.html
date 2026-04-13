@@ -640,7 +640,8 @@
         }
 
         // ── Unable to load state ──────────────────────────────────────────────────────
-        function showUnavailable() {
+        function showUnavailable(reason) {
+          console.warn('[BainUltra] showUnavailable:', reason || 'no reason given');
           var container = document.getElementById('content');
           container.textContent = '';
           var wrap = el('div', 'status-msg');
@@ -666,20 +667,49 @@
           'Installation Guides & Manuals': 'Installation Guides:Manuals'
         };
 
-        // ── Resolve a folder ID by searching parent by name ───────────────────────────
+        // ── Fuzzy-match a folder by name in a parent ─────────────────────────────────
+        // Returns the best matching folder ID or null.
         function resolveByName(name, parentId) {
-          var driveName = NAME_ALIASES[name] || name;
+          var alias = NAME_ALIASES[name] || name;
+          // Keywords: meaningful words from the display name (length > 3)
+          var keywords = name.toLowerCase()
+            .replace(/[&:\/\|]/g, ' ').split(/\s+/)
+            .filter(function (w) { return w.length > 3; });
+
           return driveList(
             "'" + parentId + "' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
             'files(id,name)',
-            100
+            200
           ).then(function (data) {
+            if (data.error) {
+              console.warn('[BainUltra] Drive API error listing', parentId, data.error);
+              return null;
+            }
             var files = data.files || [];
-            // exact match first, then alias match
-            var match = files.find(function (f) { return f.name === name; })
-                     || files.find(function (f) { return f.name === driveName; });
-            return match ? match.id : null;
-          }).catch(function () { return null; });
+            console.log('[BainUltra] resolveByName "' + name + '" in', parentId,
+              '→ found folders:', files.map(function(f){return f.name;}));
+            // 1. Exact match
+            var m = files.find(function (f) { return f.name === name; });
+            // 2. Alias match
+            if (!m) m = files.find(function (f) { return f.name === alias; });
+            // 3. Case-insensitive contains
+            if (!m) m = files.find(function (f) {
+              var fn = f.name.toLowerCase();
+              return fn.indexOf(name.toLowerCase()) !== -1
+                  || name.toLowerCase().indexOf(fn) !== -1;
+            });
+            // 4. Any keyword hit
+            if (!m) m = files.find(function (f) {
+              var fn = f.name.toLowerCase();
+              return keywords.some(function (k) { return fn.indexOf(k) !== -1; });
+            });
+            if (m) console.log('[BainUltra] Matched "' + m.name + '" → ' + m.id);
+            else console.warn('[BainUltra] No match found for "' + name + '"');
+            return m ? m.id : null;
+          }).catch(function (err) {
+            console.error('[BainUltra] resolveByName error:', err);
+            return null;
+          });
         }
 
         // ── Load from Drive API by known ID ──────────────────────────────────────────
@@ -689,9 +719,15 @@
             'files(id,name,mimeType)',
             200
           ).then(function (data) {
-            if (data.error) throw new Error(data.error.message || 'Drive API error');
+            if (data.error) {
+              console.error('[BainUltra] loadFromApi error:', data.error);
+              throw new Error(data.error.message || 'Drive API error');
+            }
             renderFiles(data.files || []);
-          }).catch(function () { showUnavailable(); });
+          }).catch(function (err) {
+            console.error('[BainUltra] loadFromApi failed:', err);
+            showUnavailable('API error: ' + (err.message || err));
+          });
         }
 
         // ── Load folder — drive-map → direct API → name search ───────────────────────
@@ -702,37 +738,57 @@
           spinner.innerHTML = '<div class="spinner"></div>Loading files&hellip;';
           container.appendChild(spinner);
 
+          var CONTENT_ID = '1-CZ3ouYd990vVYt9wzhR7Y1gsiS1IEQx';
+
           getDriveMap().then(function (map) {
             // 1. Pre-built tree has this folder — instant, no API call
             if (folderId && map && map.tree && map.tree[folderId]) {
+              console.log('[BainUltra] Serving from drive-map tree:', folderId);
               renderFiles(map.tree[folderId].children || []);
               return;
             }
 
-            if (!hasKey()) { showUnavailable(); return; }
+            if (!hasKey()) {
+              console.error('[BainUltra] API key missing — config.js not loaded or REDACTED');
+              showUnavailable('no-key');
+              return;
+            }
 
             // 2. folderId known — direct API call
             if (folderId) {
+              console.log('[BainUltra] Direct load for folderId:', folderId);
               loadFromApi(folderId);
               return;
             }
 
-            // 3. No folderId — resolve by searching content folder then root by name
-            if (!folderName || folderName === 'Brand Kit') { showUnavailable(); return; }
+            // 3. No folderId — search content folder then root by display name
+            console.log('[BainUltra] No folderId, resolving by name:', folderName);
+            if (!folderName || folderName === 'Brand Kit') {
+              showUnavailable('no-folder-name');
+              return;
+            }
 
-            var CONTENT_ID = '1-CZ3ouYd990vVYt9wzhR7Y1gsiS1IEQx';
             resolveByName(folderName, CONTENT_ID).then(function (id) {
-              if (!id) return resolveByName(folderName, ROOT_ID);
+              if (!id) {
+                console.log('[BainUltra] Not found in content folder, trying root...');
+                return resolveByName(folderName, ROOT_ID);
+              }
               return id;
             }).then(function (id) {
-              if (!id) { showUnavailable(); return; }
-              // Update URL so back-navigation and sharing have the real folderId
+              if (!id) {
+                console.warn('[BainUltra] Folder not found anywhere for:', folderName);
+                showUnavailable('folder-not-found');
+                return;
+              }
               folderId = id;
               var p = new URLSearchParams(window.location.search);
               p.set('folderId', id);
               history.replaceState({}, '', '?' + p.toString());
               loadFromApi(id);
-            }).catch(function () { showUnavailable(); });
+            }).catch(function (err) {
+              console.error('[BainUltra] Resolution error:', err);
+              showUnavailable('resolve-error');
+            });
           });
         }
 
