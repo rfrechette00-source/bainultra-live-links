@@ -1,11 +1,17 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
+// Resolve full URL for a site path. Works against any BASE_URL (live
+// GitHub Pages site at /BainUltra-Online-Hub subpath, local dev server at /,
+// future Vercel preview URL, etc). Defaults to the live site.
+const BASE_URL = process.env.BASE_URL || 'https://rfrechette00-source.github.io/BainUltra-Online-Hub';
+const at = (path) => BASE_URL.replace(/\/$/, '') + path;
+
 // ─── Hub Landing Page ──────────────────────────────────────────────────────
 
 test.describe('Hub landing page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto(at('/'));
   });
 
   test('has correct title', async ({ page }) => {
@@ -41,7 +47,7 @@ test.describe('Hub landing page', () => {
   test('no uncaught JS errors on load', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('/');
+    await page.goto(at('/'));
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -60,7 +66,7 @@ test.describe('Hub landing page', () => {
 
 test.describe('Brand Kit landing page', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/brand-kit/');
+    await page.goto(at('/brand-kit/'));
   });
 
   test('has correct title', async ({ page }) => {
@@ -109,7 +115,7 @@ test.describe('Brand Kit landing page', () => {
         failed.push(res.url());
       }
     });
-    await page.goto('/brand-kit/');
+    await page.goto(at('/brand-kit/'));
     await page.waitForLoadState('networkidle');
     expect(failed).toHaveLength(0);
   });
@@ -117,7 +123,7 @@ test.describe('Brand Kit landing page', () => {
   test('no uncaught JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('/brand-kit/');
+    await page.goto(at('/brand-kit/'));
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -132,18 +138,18 @@ test.describe('Brand Kit landing page', () => {
 
 test.describe('Brand Kit folder viewer', () => {
   test('page loads with folder name in URL', async ({ page }) => {
-    await page.goto('/brand-kit/view/?name=Product+Images');
+    await page.goto(at('/brand-kit/view/?name=Product+Images'));
     await expect(page).toHaveTitle(/BainUltra/i);
     await expect(page.locator('.header')).toBeVisible();
   });
 
   test('content div is present in DOM', async ({ page }) => {
-    await page.goto('/brand-kit/view/?name=Marketing+%26+Advertising');
+    await page.goto(at('/brand-kit/view/?name=Marketing+%26+Advertising'));
     await expect(page.locator('#content')).toBeAttached();
   });
 
   test('back-to-brand-kit link is visible', async ({ page }) => {
-    await page.goto('/brand-kit/view/?name=Brand+Guidelines');
+    await page.goto(at('/brand-kit/view/?name=Brand+Guidelines'));
     const back = page.locator('a[href="../"], a.back-link');
     await expect(back.first()).toBeVisible();
   });
@@ -151,7 +157,7 @@ test.describe('Brand Kit folder viewer', () => {
   test('no uncaught JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('/brand-kit/view/?name=Product+Images');
+    await page.goto(at('/brand-kit/view/?name=Product+Images'));
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -161,7 +167,7 @@ test.describe('Brand Kit folder viewer', () => {
 
 test.describe('Pricebook flipbook', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/pricebook/');
+    await page.goto(at('/pricebook/'));
   });
 
   test('has correct title', async ({ page }) => {
@@ -175,7 +181,7 @@ test.describe('Pricebook flipbook', () => {
   test('no uncaught JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('/pricebook/');
+    await page.goto(at('/pricebook/'));
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -185,7 +191,7 @@ test.describe('Pricebook flipbook', () => {
 
 test.describe('Brochure flipbook', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/brochure/');
+    await page.goto(at('/brochure/'));
   });
 
   test('has correct title', async ({ page }) => {
@@ -207,7 +213,7 @@ test.describe('Brochure flipbook', () => {
   test('no uncaught JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('/brochure/');
+    await page.goto(at('/brochure/'));
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -217,7 +223,7 @@ test.describe('Brochure flipbook', () => {
 
 test.describe('Presentation viewer', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/presentation/');
+    await page.goto(at('/presentation/'));
   });
 
   test('page loads without crashing', async ({ page }) => {
@@ -231,7 +237,7 @@ test.describe('Presentation viewer', () => {
   test('no uncaught JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('/presentation/');
+    await page.goto(at('/presentation/'));
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -241,7 +247,7 @@ test.describe('Presentation viewer', () => {
 
 test.describe('Terminal launcher tool', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/tools/launcher.html');
+    await page.goto(at('/tools/launcher.html'));
   });
 
   test('has correct title', async ({ page }) => {
@@ -271,7 +277,7 @@ test.describe('Terminal launcher tool', () => {
   test('no uncaught JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('/tools/launcher.html');
+    await page.goto(at('/tools/launcher.html'));
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -281,12 +287,12 @@ test.describe('Terminal launcher tool', () => {
 
 test.describe('Order Forms & Product Sheets page', () => {
   test('page loads', async ({ page }) => {
-    await page.goto('/brand-kit/order-forms-product-sheets/');
+    await page.goto(at('/brand-kit/order-forms-product-sheets/'));
     await expect(page).toHaveTitle(/BainUltra/i);
   });
 
   test('back link is visible', async ({ page }) => {
-    await page.goto('/brand-kit/order-forms-product-sheets/');
+    await page.goto(at('/brand-kit/order-forms-product-sheets/'));
     const back = page.locator('a.back-link, a[href="../"]');
     await expect(back.first()).toBeVisible();
   });
@@ -294,7 +300,7 @@ test.describe('Order Forms & Product Sheets page', () => {
   test('no uncaught JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('/brand-kit/order-forms-product-sheets/');
+    await page.goto(at('/brand-kit/order-forms-product-sheets/'));
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -304,12 +310,12 @@ test.describe('Order Forms & Product Sheets page', () => {
 
 test.describe('Showroom video page', () => {
   test('page loads', async ({ page }) => {
-    await page.goto('/brand-kit/video/');
+    await page.goto(at('/brand-kit/video/'));
     await expect(page).toHaveTitle(/BainUltra/i);
   });
 
   test('video element or container is in DOM', async ({ page }) => {
-    await page.goto('/brand-kit/video/');
+    await page.goto(at('/brand-kit/video/'));
     await page.waitForLoadState('networkidle');
     const videoEl = page.locator('video, iframe, #video-container, .video-wrapper');
     const count = await videoEl.count();
@@ -319,7 +325,7 @@ test.describe('Showroom video page', () => {
   test('no uncaught JS errors', async ({ page }) => {
     const errors = [];
     page.on('pageerror', err => errors.push(err.message));
-    await page.goto('/brand-kit/video/');
+    await page.goto(at('/brand-kit/video/'));
     await page.waitForLoadState('networkidle');
     expect(errors).toHaveLength(0);
   });
@@ -330,7 +336,7 @@ test.describe('Showroom video page', () => {
 test.describe('Mobile viewport', () => {
   test('hub landing renders without horizontal scroll', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/');
+    await page.goto(at('/'));
     const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 5);
@@ -338,7 +344,7 @@ test.describe('Mobile viewport', () => {
 
   test('brand-kit landing tiles visible on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto('/brand-kit/');
+    await page.goto(at('/brand-kit/'));
     const tiles = page.locator('a.folder-card');
     await expect(tiles.first()).toBeVisible();
   });
@@ -348,7 +354,7 @@ test.describe('Mobile viewport', () => {
 
 test.describe('Navigation flows', () => {
   test('hub → brand-kit → back to hub', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(at('/'));
     await page.locator('a.card-view[href="brand-kit/"]').click();
     await expect(page).toHaveURL(/\/brand-kit\//);
     await page.locator('a.back-link[href="../"]').click();
@@ -356,20 +362,20 @@ test.describe('Navigation flows', () => {
   });
 
   test('hub → brochure page loads', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(at('/'));
     await page.locator('a.card-view[href="brochure/"]').click();
     await expect(page).toHaveURL(/\/brochure\//);
     await expect(page).toHaveTitle(/Brochure/i);
   });
 
   test('hub → presentation page loads', async ({ page }) => {
-    await page.goto('/');
+    await page.goto(at('/'));
     await page.locator('a.card-view[href="presentation/"]').click();
     await expect(page).toHaveURL(/\/presentation\//);
   });
 
   test('brand-kit → viewer → back to brand-kit', async ({ page }) => {
-    await page.goto('/brand-kit/');
+    await page.goto(at('/brand-kit/'));
     await page.locator('a.folder-card[data-folder-name="Product Images"]').click();
     await expect(page).toHaveURL(/\/brand-kit\/view\//);
     await page.locator('a[href="../"], a.back-link').first().click();
