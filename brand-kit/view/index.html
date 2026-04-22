@@ -115,6 +115,8 @@
         position: relative;
       }
       .file-thumb img {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -566,6 +568,10 @@
             img.loading = 'lazy';
             img.style.display = 'none'; // hidden until loaded
             img.addEventListener('error', function () { this.style.display = 'none'; });
+            img.addEventListener('load', function () {
+              var ib = this.parentElement.querySelector('.folder-icon-bg');
+              if (ib) ib.style.display = 'none';
+            });
             thumb.appendChild(img);
             // Folder icon shown until image loads
             var iconBg = el('div', 'folder-icon-bg');
